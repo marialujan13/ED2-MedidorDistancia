@@ -1,0 +1,1095 @@
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001     LIST P=16F887
+                      00002     #INCLUDE <P16F887.inc>
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Jan 06 2020
+                      00005 ;  MPASM PIC16F887 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2020 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00810         LIST
+                      00003 
+                      00004     ;Configuraciones del dispositivo
+2007   23E4           00005     __CONFIG _CONFIG1, _FOSC_INTRC_NOCLKOUT & _WDTE_OFF & _PWRTE_ON & _MCLRE_ON & _CP_OFF & _CPD_OFF & _
+                            BOREN_ON & _IESO_OFF & _FCMEN_OFF & _LVP_OFF
+2008   3FFF           00006     __CONFIG _CONFIG2, _BOR4V_BOR40V & _WRT_OFF
+                      00007 
+                      00008     ;Variables
+                      00009     #DEFINE TRIGGER PORTB,2     ;Declaramos la palabra Trigger como el pin 2 del puerto b
+                      00010     #DEFINE ECHO    PORTB,1     ;Declaramos la palabra Echo como el pin 1 del puerto b
+                      00011     
+                      00012     CBLOCK 0x70
+  00000070            00013             STATUS_TEMP
+  00000071            00014             W_TEMP
+  00000072            00015             DISTANCIA
+  00000073            00016             CONT1
+  00000074            00017             CONT2
+  00000075            00018             CONTADOR1   
+  00000076            00019             CONTADOR2 
+  00000077            00020             CONTADOR3
+  00000078            00021             DATO
+  00000079            00022             CEN
+  0000007A            00023             DEC
+  0000007B            00024             UNI
+                      00025     ENDC
+                      00026 
+                      00027     ;Inicialización
+                      00028     ORG     0x00
+0000   2???           00029     GOTO    MAIN
+                      00030 
+                      00031     ;Rutina de interrupción
+                      00032     ORG     0x04
+0004   2???           00033     GOTO    ISR
+                      00034     ORG     0x05
+0005                  00035 MAIN
+                      00036     ;Configuración de puertos
+0005   1683 1703      00037     BANKSEL     ANSELH          ;Configuro puerto B y A como digital
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0007   0189           00038     CLRF        ANSELH
+0008   1683 1703      00039     BANKSEL     ANSEL
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000A   0188           00040     CLRF        ANSEL
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00041 
+000B   1683 1303      00042     BANKSEL     TRISA   
+000D   3000           00043     MOVLW       0X00            ;Puerto A como salidas
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000E   0085           00044     MOVWF       TRISA
+000F   3003           00045     MOVLW       b'00000011'     ;Configuro RB0 y RB1 como entradas y RB2 como salida
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0010   0086           00046     MOVWF       TRISB
+                      00047     
+0011   1283 1303      00048     BANKSEL     PORTA
+0013   0185           00049     CLRF        PORTA
+0014   0186           00050     CLRF        PORTB           ;Limpio puerto B
+                      00051     
+0015   1683 1303      00052     BANKSEL     OPTION_REG
+0017   3001           00053     MOVLW       b'00000001'     ;Configurar TMR0 como temporizador (T0CS = 0)
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0018   0081           00054     MOVWF       OPTION_REG      ;Asignar el preescalador al temporizador TMR0 (PSA = 0), prescaler = 4
+                      00055                                 ;Habilito resistencias de pull-up
+0019   1683 1303      00056     BANKSEL     WPUB
+001B   3001           00057     MOVLW       b'00000001'     ;Configurar resistencia de pull-up interna para RB0
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001C   0095           00058     MOVWF       WPUB
+001D   01F2           00059     CLRF        DISTANCIA
+                      00060     
+                      00061     ;Configuracion del EUSART
+001E   1683 1303      00062     BANKSEL     SPBRG
+0020   3019           00063     MOVLW       0x19            ;Baud rate = 9600bps a 4MHZ
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0021   0099           00064     MOVWF       SPBRG
+0022   1683 1303      00065     BANKSEL     TXSTA
+0024   3024           00066     MOVLW       0x24            ;SYNC=0, BRGH=1, TX9=0, TXEN=1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0025   0098           00067     MOVWF       TXSTA
+0026   1283 1303      00068     BANKSEL     RCSTA
+0028   3090           00069     MOVLW       0x90
+0029   0098           00070     MOVWF       RCSTA   
+002A   1283 1303      00071     BANKSEL     PIR1
+002C   120C           00072     BCF         PIR1, TXIF      ;Limpiar el flag de transmisión
+                      00073  
+                      00074     ;Configuracion de LCD   
+002D   2???           00075     CALL        RETARDO40ms
+002E   3030           00076     MOVLW       0X30            ;Este es un comando de inicialización para el LCD. 
+                      00077                                 ;El valor 0x30 se envía para configurar el LCD en el modo de 8 bits.
+002F   2???           00078     CALL        ENVIARCOMANDO
+0030   3038           00079     MOVLW       0X38            ;Modo de 8 bits, 2 líneas de display y una matriz 
+                      00080                                 ;de 5x8 puntos por carácter
+0031   2???           00081     CALL        ENVIARCOMANDO
+0032   3008           00082     MOVLW       0X08            ;APAGA EL DISPLAY
+0033   2???           00083     CALL        ENVIARCOMANDO
+0034   3001           00084     MOVLW       0X01            ;LIMPIA EL DISPLAY
+0035   2???           00085     CALL        ENVIARCOMANDO
+0036   3003           00086     MOVLW       0X03            ;Return home, o regreso a la primera linea
+0037   2???           00087     CALL        ENVIARCOMANDO
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0038   300C           00088     MOVLW       0X0C            ;Enciende el display, sin cursor, sin parpadeo
+0039   2???           00089     CALL        ENVIARCOMANDO
+                      00090     
+                      00091     ;Escribir en la primera línea
+003A   3080           00092     MOVLW       0x80            ;Dirección DDRAM para la primera línea (0x00 + 0x80)
+003B   2???           00093     CALL        ENVIARCOMANDO
+003C   3020           00094     MOVLW       ' '
+003D   2???           00095     CALL        ENVIARLETRA
+003E   3020           00096     MOVLW       ' '
+003F   2???           00097     CALL        ENVIARLETRA
+0040   3020           00098     MOVLW       ' '
+0041   2???           00099     CALL        ENVIARLETRA
+0042   3020           00100     MOVLW       ' '
+0043   2???           00101     CALL        ENVIARLETRA
+0044   3044           00102     MOVLW       'D'
+0045   2???           00103     CALL        ENVIARLETRA
+0046   3069           00104     MOVLW       'i'
+0047   2???           00105     CALL        ENVIARLETRA
+0048   3073           00106     MOVLW       's'
+0049   2???           00107     CALL        ENVIARLETRA
+004A   3074           00108     MOVLW       't'
+004B   2???           00109     CALL        ENVIARLETRA
+004C   3061           00110     MOVLW       'a'
+004D   2???           00111     CALL        ENVIARLETRA
+004E   306E           00112     MOVLW       'n'
+004F   2???           00113     CALL        ENVIARLETRA
+0050   3063           00114     MOVLW       'c'
+0051   2???           00115     CALL        ENVIARLETRA
+0052   3069           00116     MOVLW       'i'
+0053   2???           00117     CALL        ENVIARLETRA
+0054   3061           00118     MOVLW       'a'
+0055   2???           00119     CALL        ENVIARLETRA
+                      00120     
+                      00121     
+                      00122 ;/////////////////INICIALIZACION DEL SENSOR ULTRASONICO/////////////////////////
+                      00123     
+                      00124     ;Verificar si el pulsador ha sido presionado
+0056                  00125 WAIT_RB0
+0056   1806           00126     BTFSC       PORTB,0         ;Salir del bucle si el pulsador está presionado
+0057   2???           00127     GOTO        WAIT_RB0
+0058   2???           00128     GOTO        TRIGGER_ON
+                      00129     
+0059                  00130 TRIGGER_ON
+0059   2???           00131     CALL        RETARDO100ms
+005A   1506           00132     BSF         TRIGGER         ;Envío pulso de 10us al pin TRIGGER del sensor
+005B   2???           00133     CALL        DELAY_10micros
+005C   1106           00134     BCF         TRIGGER
+                      00135     
+005D                  00136 NO_ES_UNO
+005D   1C86           00137     BTFSS       ECHO            ;Pregunto si el pin echo se puso en 1
+005E   2???           00138     GOTO        NO_ES_UNO
+                      00139     ;Cargar el valor inicial en el registro TMR0
+005F   1283 1303      00140     BANKSEL     TMR0
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0061   30F9           00141     MOVLW       .249             ; Cargar el valor 249 para contar 58us
+0062   0081           00142     MOVWF       TMR0               
+0063   30A0           00143     MOVLW       b'10100000'      ; Limpiar la bandera de desbordamiento de TMR0, habilitar
+0064   008B           00144     MOVWF       INTCON           ; GIE y T0IE
+                      00145     
+0065                  00146 NO_ES_CERO
+0065   1886           00147     BTFSC       ECHO             ;Pregunto si se puso en 0
+0066   2???           00148     GOTO        NO_ES_CERO
+0067   018B           00149     CLRF        INTCON           ;Se ha producido el flanco de bajada. Prohíbe interrup.
+0068   3002           00150     MOVLW       .2
+0069   0272           00151     SUBWF       DISTANCIA,W      ;DISTANCIA - W(2)
+006A   1C03           00152     BTFSS       STATUS,C
+006B   2???           00153     GOTO        MSJ_ERROR        ;DISTANCIA =< 2cm FUERA DE LOS LIMITES
+006C   30C8           00154     MOVLW       .200             ;Salta si distancia no es menor a dos y testea que no sea mayor a 200
+006D   0272           00155     SUBWF       DISTANCIA,W      ;DISTANCIA - W(200) 
+006E   1C03           00156     BTFSS       STATUS,C           
+006F   2???           00157     GOTO        MOSTRAR_DIS      ;DISTANCIA <= 200cm
+0070   2???           00158     GOTO        MSJ_ERROR        ;DISTANCIA > 200 FUERA DE LOS LIMITES
+                      00159     
+0071                  00160 MSJ_ERROR
+0071   30C0           00161     MOVLW       0xC0             ;Dirección DDRAM para la segunda línea (0x40 + 0x80)
+0072   2???           00162     CALL        ENVIARCOMANDO
+0073   3020           00163     MOVLW       ' '
+0074   2???           00164     CALL        ENVIARLETRA
+0075   3020           00165     MOVLW       ' '
+0076   2???           00166     CALL        ENVIARLETRA
+0077   3020           00167     MOVLW       ' '
+0078   2???           00168     CALL        ENVIARLETRA
+0079   3020           00169     MOVLW       ' '
+007A   2???           00170     CALL        ENVIARLETRA
+007B   3020           00171     MOVLW       ' '
+007C   2???           00172     CALL        ENVIARLETRA
+007D   3020           00173     MOVLW       ' '
+007E   2???           00174     CALL        ENVIARLETRA
+007F   3045           00175     MOVLW       'E'
+0080   2???           00176     CALL        ENVIARLETRA
+0081   3052           00177     MOVLW       'R'
+0082   2???           00178     CALL        ENVIARLETRA
+0083   3052           00179     MOVLW       'R'
+0084   2???           00180     CALL        ENVIARLETRA
+0085   304F           00181     MOVLW       'O'
+0086   2???           00182     CALL        ENVIARLETRA
+0087   3052           00183     MOVLW       'R'
+0088   2???           00184     CALL        ENVIARLETRA
+0089   2???           00185     CALL        TRANSMIT_STRING
+008A   2???           00186     GOTO        FIN
+                      00187     
+008B                  00188 MOSTRAR_DIS
+008B   30C0           00189     MOVLW       0xC0            ;Dirección DDRAM para la segunda línea (0x40 + 0x80)
+008C   2???           00190     CALL        ENVIARCOMANDO
+008D   3020           00191     MOVLW       ' '
+008E   2???           00192     CALL        ENVIARLETRA
+008F   3020           00193     MOVLW       ' '
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0090   2???           00194     CALL        ENVIARLETRA
+0091   3020           00195     MOVLW       ' '
+0092   2???           00196     CALL        ENVIARLETRA
+0093   3020           00197     MOVLW       ' '
+0094   2???           00198     CALL        ENVIARLETRA
+0095   3020           00199     MOVLW       ' '
+0096   2???           00200     CALL        ENVIARLETRA
+0097   2???           00201     CALL        ENVIARNUMERO
+0098   3020           00202     MOVLW       ' '
+0099   2???           00203     CALL        ENVIARLETRA
+009A   3063           00204     MOVLW       'c'
+009B   2???           00205     CALL        ENVIARLETRA
+009C   306D           00206     MOVLW       'm'
+009D   2???           00207     CALL        ENVIARLETRA
+009E   2???           00208     CALL        TRANSMIT_DISTANCIA
+009F   2???           00209     GOTO        FIN
+                      00210     
+00A0                  00211 ENVIARCOMANDO       
+00A0   0085           00212     MOVWF       PORTA
+00A1   1386           00213     BCF         PORTB, 7
+00A2   1686           00214     BSF         PORTB, 5
+00A3   2???           00215     CALL        RETARDO1ms
+00A4   1286           00216     BCF         PORTB, 5
+00A5   0008           00217     RETURN
+                      00218     
+00A6                  00219 ENVIARLETRA     
+00A6   0085           00220     MOVWF       PORTA
+00A7   1786           00221     BSF         PORTB, 7
+00A8   1686           00222     BSF         PORTB, 5
+00A9   2???           00223     CALL        RETARDO1ms
+00AA   1286           00224     BCF         PORTB, 5
+00AB   0008           00225     RETURN
+                      00226  
+00AC                  00227 ENVIARNUMERO
+00AC   2???           00228     CALL        DCU
+00AD   0879           00229     MOVF        CEN,W            ;Almacena el dígito de las centenas
+00AE   2???           00230     CALL        ENVIARDIGITO     ;Envia el dígito de las centenas
+                      00231     
+00AF   087A           00232     MOVF        DEC,W            ;Almacena el dígito de las decenas
+00B0   2???           00233     CALL        ENVIARDIGITO     ;Envia el dígito de las decenas
+                      00234     
+00B1   087B           00235     MOVF        UNI,W            ;Almacena el dígito de las unidades
+00B2   2???           00236     CALL        ENVIARDIGITO     ;Envia el dígito de las unidades
+                      00237     
+00B3   0008           00238     RETURN
+                      00239 
+00B4                  00240 ENVIARDIGITO
+00B4   3E30           00241     ADDLW       '0'              ;Convierte el valor en W a su ASCII equivalente
+00B5   2???           00242     CALL        ENVIARLETRA
+00B6   0008           00243     RETURN   
+                      00244 
+                      00245 ;////////RUTINA QUE DESCOMPONE UN NUMERO EN CENTENAS, DECENAS, UNIDADES/////////
+00B7                  00246 DCU   
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00B7   01F9           00247     CLRF        CEN
+00B8   01FA           00248     CLRF        DEC
+00B9   01FB           00249     CLRF        UNI
+00BA   08F2           00250     MOVF        DISTANCIA,F
+00BB   1C83           00251     BTFSS       STATUS,F
+00BC   2???           00252     GOTO        DIST_ES_DIF_DE_0
+00BD   0008           00253     RETURN
+00BE                  00254 DIST_ES_DIF_DE_0
+00BE                  00255 EVAL_SI_DIST_ES_MAY_IGUAL_A_10
+00BE   300A           00256     MOVLW       D'10'
+00BF   0272           00257     SUBWF       DISTANCIA,W
+00C0   1803           00258     BTFSC       STATUS,C
+00C1   2???           00259     GOTO        DIST_ES_MAY_IGUAL_QUE_10
+00C2   2???           00260     GOTO        DIST_ES_MENOR_A_10
+00C3                  00261 DIST_ES_MENOR_A_10
+00C3   0872           00262     MOVF        DISTANCIA,W
+00C4   00FB           00263     MOVWF       UNI
+00C5   0008           00264     RETURN
+00C6                  00265 DIST_ES_MAY_IGUAL_QUE_10
+00C6   300A           00266     MOVLW       D'10'
+00C7   02F2           00267     SUBWF       DISTANCIA,F
+00C8   0AFA           00268     INCF        DEC,F
+                      00269     ;LO SIGUIENTE EVALUA SI DEC=10
+00C9   300A           00270     MOVLW       D'10'
+00CA   027A           00271     SUBWF       DEC,W
+00CB   1D03           00272     BTFSS       STATUS,Z
+00CC   2???           00273     GOTO        EVAL_SI_DIST_ES_MAY_IGUAL_A_10
+00CD   01FA           00274     CLRF        DEC
+00CE   0AF9           00275     INCF        CEN,F
+00CF   2???           00276     GOTO        EVAL_SI_DIST_ES_MAY_IGUAL_A_10 
+                      00277 
+                      00278 ;/////////////////////////RUTINA DE INTERRUPCION////////////////////////////////
+00D0                  00279 ISR
+                      00280     ;Guardo contexto
+00D0   00F1           00281     MOVWF       W_TEMP
+00D1   0E03           00282     SWAPF       STATUS,W
+00D2   00F0           00283     MOVWF       STATUS_TEMP
+                      00284         
+                      00285     ;Subrutina de interrupción
+00D3   3001           00286     MOVLW       .1
+00D4   07F2           00287     ADDWF       DISTANCIA,F 
+00D5   110B           00288     BCF         INTCON,T0IF
+00D6   30F9           00289     MOVLW       .249
+00D7   0081           00290     MOVWF       TMR0
+                      00291     
+                      00292     ;Recuperar contexto
+00D8   0E70           00293     SWAPF       STATUS_TEMP,W
+00D9   0083           00294     MOVWF       STATUS
+00DA   0EF1           00295     SWAPF       W_TEMP,F
+00DB   0E71           00296     SWAPF       W_TEMP,W
+00DC   0009           00297     RETFIE
+                      00298 
+                      00299 ;////////////////////RUTINAS PARA TRANSMISION SERIE/////////////////////////////
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00DD                  00300 TRANSMIT_BYTE
+                      00301     ;Esperar hasta que el buffer esté vacío
+00DD   1683 1303      00302     BANKSEL     TXSTA
+00DF                  00303 wait_tx                         ;Loop que espera la transmision
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+00DF   1C98           00304     BTFSS       TXSTA, TRMT
+00E0   2???           00305     GOTO        wait_tx
+                      00306     ;Enviar el dato
+00E1   1283 1303      00307     BANKSEL     TXREG
+00E3   0099           00308     MOVWF       TXREG
+00E4   0008           00309     RETURN
+                      00310 
+00E5                  00311 TRANSMIT_STRING
+00E5   3045           00312     MOVLW 'E'
+00E6   2???           00313     CALL TRANSMIT_BYTE
+00E7   3052           00314     MOVLW 'R'
+00E8   2???           00315     CALL TRANSMIT_BYTE
+00E9   3052           00316     MOVLW 'R'
+00EA   2???           00317     CALL TRANSMIT_BYTE
+00EB   304F           00318     MOVLW 'O'
+00EC   2???           00319     CALL TRANSMIT_BYTE
+00ED   3052           00320     MOVLW 'R'
+00EE   2???           00321     CALL TRANSMIT_BYTE
+00EF   0008           00322     RETURN
+                      00323 
+00F0                  00324 TRANSMIT_DISTANCIA
+00F0   0879           00325     MOVF CEN,W
+00F1   2???           00326     CALL TRANSMIT_BYTE
+00F2   087A           00327     MOVF DEC,W
+00F3   2???           00328     CALL TRANSMIT_BYTE
+00F4   087B           00329     MOVF UNI,W
+00F5   2???           00330     CALL TRANSMIT_BYTE
+00F6   0008           00331     RETURN
+                      00332 
+                      00333 ;//////////////////////////////RETARDOS/////////////////////////////////////////
+00F7                  00334 RETARDO40ms     
+00F7   3037           00335     MOVLW       .55
+00F8   00F6           00336     MOVWF       CONTADOR2
+00F9                  00337 T25         
+00F9   30E5           00338     MOVLW       .229
+00FA   00F5           00339     MOVWF       CONTADOR1
+00FB                  00340 T15         
+00FB   0BF5           00341     DECFSZ      CONTADOR1,f
+00FC   2???           00342     GOTO        T15
+00FD   0BF6           00343     DECFSZ      CONTADOR2,f
+00FE   2???           00344     GOTO        T25
+00FF   0008           00345     RETURN
+                      00346     
+0100                  00347 RETARDO1ms      
+0100   300B           00348     MOVLW       .11
+0101   00F6           00349     MOVWF       CONTADOR2
+0102                  00350 T27             
+0102   3019           00351     MOVLW       .25     
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0103   00F5           00352     MOVWF       CONTADOR1
+0104                  00353 T17             
+0104   0BF5           00354     DECFSZ      CONTADOR1,f     
+0105   2???           00355     GOTO        T17
+0106   0BF6           00356     DECFSZ      CONTADOR2,f
+0107   2???           00357     GOTO        T27
+0108   0008           00358     RETURN
+                      00359     
+0109                  00360 DELAY_10micros
+0109   3005           00361     MOVLW       .5
+010A   0084           00362     MOVWF       P
+010B                  00363 B1
+010B   0B84           00364     DECFSZ      P,1
+010C   2???           00365     GOTO        B1
+010D   0008           00366     RETURN
+                      00367     
+010E                  00368 RETARDO100ms
+010E   3082           00369     MOVLW       .130
+010F   00F3           00370     MOVWF       CONT1
+0110                  00371 R2  
+0110   30FF           00372     MOVLW       .255
+0111   00F4           00373     MOVWF       CONT2
+0112                  00374 R1  
+0112   0BF4           00375     DECFSZ      CONT2,F
+0113   2???           00376     GOTO        R1
+0114   0BF3           00377     DECFSZ      CONT1,F
+0115   2???           00378     GOTO        R2
+0116   0008           00379     RETURN
+                      00380         
+0117                  00381 FIN
+0117   2???           00382     GOTO    $
+23E4 3FFF             00383     END
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ABDEN                             00000000
+ABDOVF                            00000007
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANS0                              00000000
+ANS1                              00000001
+ANS10                             00000002
+ANS11                             00000003
+ANS12                             00000004
+ANS13                             00000005
+ANS2                              00000002
+ANS3                              00000003
+ANS4                              00000004
+ANS5                              00000005
+ANS6                              00000006
+ANS7                              00000007
+ANS8                              00000000
+ANS9                              00000001
+ANSEL                             00000188
+ANSELH                            00000189
+B1                                0000010B
+BAUDCTL                           00000187
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRG0                              00000000
+BRG1                              00000001
+BRG10                             00000002
+BRG11                             00000003
+BRG12                             00000004
+BRG13                             00000005
+BRG14                             00000006
+BRG15                             00000007
+BRG16                             00000003
+BRG2                              00000002
+BRG3                              00000003
+BRG4                              00000004
+BRG5                              00000005
+BRG6                              00000006
+BRG7                              00000007
+BRG8                              00000000
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+BRG9                              00000001
+BRGH                              00000002
+C                                 00000000
+C1CH0                             00000000
+C1CH1                             00000001
+C1IE                              00000005
+C1IF                              00000005
+C1OE                              00000005
+C1ON                              00000007
+C1OUT                             00000006
+C1POL                             00000004
+C1R                               00000002
+C1RSEL                            00000005
+C1SEN                             00000005
+C2CH0                             00000000
+C2CH1                             00000001
+C2IE                              00000006
+C2IF                              00000006
+C2OE                              00000005
+C2ON                              00000007
+C2OUT                             00000006
+C2POL                             00000004
+C2R                               00000002
+C2REN                             00000004
+C2RSEL                            00000004
+C2SYNC                            00000000
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2                             0000001B
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CEN                               00000079
+CHS0                              00000002
+CHS1                              00000003
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS2                              00000004
+CHS3                              00000005
+CKE                               00000006
+CKP                               00000004
+CM1CON0                           00000107
+CM2CON0                           00000108
+CM2CON1                           00000109
+CONT1                             00000073
+CONT2                             00000074
+CONTADOR1                         00000075
+CONTADOR2                         00000076
+CONTADOR3                         00000077
+CREN                              00000004
+CSRC                              00000007
+D                                 00000005
+DATA_ADDRESS                      00000005
+DATO                              00000078
+DC                                00000001
+DC1B0                             00000004
+DC1B1                             00000005
+DC2B0                             00000004
+DC2B1                             00000005
+DCU                               000000B7
+DEC                               0000007A
+DELAY_10micros                    00000109
+DISTANCIA                         00000072
+DIST_ES_DIF_DE_0                  000000BE
+DIST_ES_MAY_IGUAL_QUE_10          000000C6
+DIST_ES_MENOR_A_10                000000C3
+D_A                               00000005
+D_NOT_A                           00000005
+ECCPAS                            0000009C
+ECCPAS0                           00000004
+ECCPAS1                           00000005
+ECCPAS2                           00000006
+ECCPASE                           00000007
+ECHO                              PORTB,1
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDAT                             0000010C
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+ENVIARCOMANDO                     000000A0
+ENVIARDIGITO                      000000B4
+ENVIARLETRA                       000000A6
+ENVIARNUMERO                      000000AC
+EVAL_SI_DIST_ES_MAY_IGUAL_A_10    000000BE
+F                                 00000001
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+FERR                              00000002
+FIN                               00000117
+FSR                               00000004
+FVREN                             00000000
+GCEN                              00000007
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+HTS                               00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IOCB6                             00000006
+IOCB7                             00000007
+IRCF0                             00000004
+IRCF1                             00000005
+IRCF2                             00000006
+IRP                               00000007
+ISR                               000000D0
+LTS                               00000001
+MAIN                              00000005
+MC1OUT                            00000007
+MC2OUT                            00000006
+MOSTRAR_DIS                       0000008B
+MSJ_ERROR                         00000071
+MSK                               00000093
+MSK0                              00000000
+MSK1                              00000001
+MSK2                              00000002
+MSK3                              00000003
+MSK4                              00000004
+MSK5                              00000005
+MSK6                              00000006
+MSK7                              00000007
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+NO_ES_CERO                        00000065
+NO_ES_UNO                         0000005D
+OERR                              00000001
+OPTION_REG                        00000081
+OSCCON                            0000008F
+OSCTUNE                           00000090
+OSFIE                             00000007
+OSFIF                             00000007
+OSTS                              00000003
+P                                 00000004
+P1M0                              00000006
+P1M1                              00000007
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PDC0                              00000000
+PDC1                              00000001
+PDC2                              00000002
+PDC3                              00000003
+PDC4                              00000004
+PDC5                              00000005
+PDC6                              00000006
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PRSEN                             00000007
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSSAC0                            00000002
+PSSAC1                            00000003
+PSSBD0                            00000000
+PSSBD1                            00000001
+PSTRCON                           0000009D
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PULSR                             00000002
+PULSS                             00000003
+PWM1CON                           0000009B
+R                                 00000002
+R1                                00000112
+R2                                00000110
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RA6                               00000006
+RA7                               00000007
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIDL                             00000006
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RD0                               00000000
+RD1                               00000001
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RE0                               00000000
+RE1                               00000001
+RE2                               00000002
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 15
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RE3                               00000003
+READ_WRITE                        00000002
+RETARDO100ms                      0000010E
+RETARDO1ms                        00000100
+RETARDO40ms                       000000F7
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RX9                               00000006
+RX9D                              00000000
+R_NOT_W                           00000002
+R_W                               00000002
+S                                 00000003
+SBOREN                            00000004
+SCKP                              00000004
+SCS                               00000000
+SEN                               00000000
+SENDB                             00000003
+SMP                               00000007
+SPBRG                             00000099
+SPBRGH                            0000009A
+SPEN                              00000007
+SR0                               00000006
+SR1                               00000007
+SRCON                             00000185
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPMSK                            00000093
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+STATUS_TEMP                       00000070
+STRA                              00000000
+STRB                              00000001
+STRC                              00000002
+STRD                              00000003
+STRSYNC                           00000004
+SWDTEN                            00000000
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 16
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T15                               000000FB
+T17                               00000104
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1GINV                            00000007
+T1GIV                             00000007
+T1GSS                             00000001
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T25                               000000F9
+T27                               00000102
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRANSMIT_BYTE                     000000DD
+TRANSMIT_DISTANCIA                000000F0
+TRANSMIT_STRING                   000000E5
+TRIGGER                           PORTB,2
+TRIGGER_ON                        00000059
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISA6                            00000006
+TRISA7                            00000007
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 17
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000088
+TRISD0                            00000000
+TRISD1                            00000001
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+TRISD7                            00000007
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRISE3                            00000003
+TRMT                              00000001
+TUN0                              00000000
+TUN1                              00000001
+TUN2                              00000002
+TUN3                              00000003
+TUN4                              00000004
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+ULPWUE                            00000005
+ULPWUIE                           00000002
+ULPWUIF                           00000002
+UNI                               0000007B
+VCFG0                             00000004
+VCFG1                             00000005
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 18
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+VR3                               00000003
+VRCON                             00000097
+VREN                              00000007
+VROE                              00000006
+VRR                               00000005
+VRSS                              00000004
+W                                 00000000
+WAIT_RB0                          00000056
+WCOL                              00000007
+WDTCON                            00000105
+WDTPS0                            00000001
+WDTPS1                            00000002
+WDTPS2                            00000003
+WDTPS3                            00000004
+WPUB                              00000095
+WPUB0                             00000000
+WPUB1                             00000001
+WPUB2                             00000002
+WPUB3                             00000003
+WPUB4                             00000004
+WPUB5                             00000005
+WPUB6                             00000006
+WPUB7                             00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+WUE                               00000001
+W_TEMP                            00000071
+Z                                 00000002
+_.org_2_0117                      00000117
+_BOR21V                           00003EFF
+_BOR40V                           00003FFF
+_BOR4V_BOR21V                     00003EFF
+_BOR4V_BOR40V                     00003FFF
+_BOREN_NSLEEP                     00003EFF
+_BOREN_OFF                        00003CFF
+_BOREN_ON                         00003FFF
+_BOREN_SBODEN                     00003DFF
+_BOR_NSLEEP                       00003EFF
+_BOR_OFF                          00003CFF
+_BOR_ON                           00003FFF
+_BOR_SBODEN                       00003DFF
+_CONFIG1                          00002007
+_CONFIG2                          00002008
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003F7F
+_CP_OFF                           00003FFF
+_CP_ON                            00003FBF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         00001FFF
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC                            00003FFF
+MPASM 5.87              NEWPIC_8B_SIMPLE.ASM   6-17-2024  22:37:26         PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_EXTRCIO                          00003FFE
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FCMEN_OFF                        000037FF
+_FCMEN_ON                         00003FFF
+_FOSC_EC                          00003FFB
+_FOSC_EXTRC_CLKOUT                00003FFF
+_FOSC_EXTRC_NOCLKOUT              00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRC_CLKOUT                00003FFD
+_FOSC_INTRC_NOCLKOUT              00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_IESO_OFF                         00003BFF
+_IESO_ON                          00003FFF
+_INTOSC                           00003FFD
+_INTOSCIO                         00003FFC
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_LVP_OFF                          00002FFF
+_LVP_ON                           00003FFF
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FF9
+__16F887                          00000001
+wait_tx                           000000DF
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     9 reported,     0 suppressed
+
+

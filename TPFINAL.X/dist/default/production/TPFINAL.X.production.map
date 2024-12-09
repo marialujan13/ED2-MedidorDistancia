@@ -1,0 +1,104 @@
+MPLINK 5.09, LINKER
+Linker Map File - Created Mon Jun 17 22:37:29 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_1       code   0x000004    program   0x000002
+                   .org_2       code   0x000005    program   0x000226
+.config_2007_BUILD/DEFAULT/PRODUCTION/NEWPIC_       code   0x002007    program   0x000002
+.config_2008_BUILD/DEFAULT/PRODUCTION/NEWPIC_       code   0x002008    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x000117      
+                            0x002007    0x002008      
+            281 out of 8455 program addresses used, program memory utilization is 3%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                       B1   0x00010b    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      DCU   0x0000b7    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+           DELAY_10micros   0x000109    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+         DIST_ES_DIF_DE_0   0x0000be    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+ DIST_ES_MAY_IGUAL_QUE_10   0x0000c6    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+       DIST_ES_MENOR_A_10   0x0000c3    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+            ENVIARCOMANDO   0x0000a0    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+             ENVIARDIGITO   0x0000b4    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+              ENVIARLETRA   0x0000a6    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+             ENVIARNUMERO   0x0000ac    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+EVAL_SI_DIST_ES_MAY_IGUAL_A_10   0x0000be    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      FIN   0x000117    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      ISR   0x0000d0    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                     MAIN   0x000005    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+              MOSTRAR_DIS   0x00008b    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                MSJ_ERROR   0x000071    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+               NO_ES_CERO   0x000065    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                NO_ES_UNO   0x00005d    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                       R1   0x000112    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                       R2   0x000110    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+             RETARDO100ms   0x00010e    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+               RETARDO1ms   0x000100    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+              RETARDO40ms   0x0000f7    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      T15   0x0000fb    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      T17   0x000104    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      T25   0x0000f9    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      T27   0x000102    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+            TRANSMIT_BYTE   0x0000dd    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+       TRANSMIT_DISTANCIA   0x0000f0    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+          TRANSMIT_STRING   0x0000e5    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+               TRIGGER_ON   0x000059    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                 WAIT_RB0   0x000056    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+             _.org_2_0117   0x000117    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                  wait_tx   0x0000df    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                     MAIN   0x000005    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                 WAIT_RB0   0x000056    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+               TRIGGER_ON   0x000059    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                NO_ES_UNO   0x00005d    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+               NO_ES_CERO   0x000065    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                MSJ_ERROR   0x000071    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+              MOSTRAR_DIS   0x00008b    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+            ENVIARCOMANDO   0x0000a0    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+              ENVIARLETRA   0x0000a6    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+             ENVIARNUMERO   0x0000ac    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+             ENVIARDIGITO   0x0000b4    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      DCU   0x0000b7    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+EVAL_SI_DIST_ES_MAY_IGUAL_A_10   0x0000be    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+         DIST_ES_DIF_DE_0   0x0000be    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+       DIST_ES_MENOR_A_10   0x0000c3    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+ DIST_ES_MAY_IGUAL_QUE_10   0x0000c6    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      ISR   0x0000d0    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+            TRANSMIT_BYTE   0x0000dd    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                  wait_tx   0x0000df    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+          TRANSMIT_STRING   0x0000e5    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+       TRANSMIT_DISTANCIA   0x0000f0    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+              RETARDO40ms   0x0000f7    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      T25   0x0000f9    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      T15   0x0000fb    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+               RETARDO1ms   0x000100    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      T27   0x000102    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      T17   0x000104    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+           DELAY_10micros   0x000109    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                       B1   0x00010b    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+             RETARDO100ms   0x00010e    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                       R2   0x000110    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                       R1   0x000112    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+                      FIN   0x000117    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+             _.org_2_0117   0x000117    program     static C:\Users\lujan\OneDrive\Documentos\FCEFYN\4to\Electrónica Digital II\TP Final\TP Medidor Distancia Ultrasonico\TPFINAL.X\newpic_8b_simple.asm
+
+
